@@ -1,0 +1,42 @@
+name: sub2api-fast-toggle
+
+services:
+  fast-proxy:
+    image: sub2api-fast-toggle:local
+    build:
+      context: .
+      dockerfile: proxy/Dockerfile
+    container_name: sub2api-fast-toggle
+    restart: unless-stopped
+    environment:
+      UPSTREAM_URL: ${SUB2API_URL:-http://host.docker.internal:8081}
+      LISTEN_ADDR: :8080
+      FAST_MODE_FILE: /runtime/mode
+      FAST_SERVICE_TIER: ${FAST_SERVICE_TIER:-fast}
+      PRIORITY_MODELS: ${PRIORITY_MODELS:-gpt-5.6-sol}
+      RESPONSE_PATHS: ${RESPONSE_PATHS:-/v1/responses,/responses,/backend-api/codex/responses}
+      MAX_BODY_BYTES: ${MAX_BODY_BYTES:-67108864}
+    ports:
+      - "${FAST_PROXY_BIND:-127.0.0.1}:${FAST_PROXY_PORT:-18081}:8080"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - type: bind
+        source: ./runtime
+        target: /runtime
+        read_only: true
+        bind:
+          create_host_path: false
+    read_only: true
+    user: "65532:65532"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "/sub2api-fast-toggle", "healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    stop_grace_period: 30s
