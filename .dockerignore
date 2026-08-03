@@ -1,0 +1,8 @@
+*
+!proxy/
+!proxy/**
+!LICENSE
+!LICENSES/
+!LICENSES/Go-BSD-3-Clause.txt
+!NOTICE.md
+!THIRD_PARTY_NOTICES.md
